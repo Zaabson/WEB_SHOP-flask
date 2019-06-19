@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="left-content">
+    </div>
+    <article class="main-content">
+        <h1>{{ product.name }}</h1>
+        <h3>{{ product.description }}</h3>
+        <a class='btn btn-success' href="{{ url_for('add_to_cart', id=product.id) }}">Add to cart</a>
+    </article>
+{% endblock content %}

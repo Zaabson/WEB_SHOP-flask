@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <LINK REL=StyleSheet HREF="{{ url_for('static', filename='main.css') }}" TYPE="text/css">
+</head>
+<body>
+    <header style="margin-bottom: 40px">
+        <a class='bigtitle-link' href="{{ url_for('home') }}"><div class="bigtitle">WEB SHOP</div></a>
+
+        <nav class="navbar-main">
+            <ul>
+                <li><a class="{{ 'active' if active == 'home' }}" href="{{ url_for('home') }}">Home</a></li>
+                <li><a class="{{ 'active' if active == 'products' }}" href="{{ url_for('products') }}">Products</a></li>
+                <li><a class="{{ 'active' if active == 'about' }}" href="{{ url_for('about') }}">About</a></li>
+
+                {% if current_user.is_authenticated %}
+                    <li style="float:right"><a class="{{ 'active' if active == 'account' }}" href="{{ url_for('account', id=current_user.id, active='favourites') }}">Account</a></li>
+                {% else %}
+                    <li style="float:right"><a class="{{ 'active' if active == 'login' }}" href="{{ url_for('login') }}">Login</a></li>
+                    <li style="float:right"><a class="{{ 'active' if active == 'register' }}" href="{{ url_for('register') }}">Create an Account</a></li>
+                {% endif %}
+
+                <li style="float:right"><a data-toggle="modal" data-target="#exampleModal" href="">Your cart</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}
+    {% endblock content %}
+
+        <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Your Cart</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div>
+              <fieldset class="border">
+              {% if cart %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <td scope="col">Product name</td>
+                                <td scope="col">price</td>
+                                <td scope="col">quantity</td>
+                            </tr>
+                        </thead>
+                        {% for product_id in cart.keys() %}
+                            {% set product = Product.query.filter_by(id=product_id).first() %}
+                            <tr>
+                                    <th class="font-weight-bold">{{ product.name }}</th>
+                                    <td>{{ "{:.2f}".format(product.price / 100) }}</td>
+                                    <td>{{ cart[product_id] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+              {% else %}
+                  <h3 class="m-3">Your cart is empty</h3>
+              {% endif %}
+              </fieldset>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <a class="btn btn-primary" href="{{ url_for('checkout') }}">Go to Checkout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    {% if show_modal %}
+        <script>$('#exampleModal').modal('show')</script>
+    {% endif %}
+
+</body>
+</html>

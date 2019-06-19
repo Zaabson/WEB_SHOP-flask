@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="left-content">
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <fieldset class="filter-border">
+            <div class="form-group mb-2" style="width:100%">
+                {{ form.search.label(class="form-control-label") }}
+                {{ form.search(class="form-control", placeholder="Search") }}
+            </div>
+            <div class="form-group mb-2">
+                {{ form.sort.label(class="form-control-label") }}
+                {{ form.sort(class="form-control") }}
+            </div>
+            <div class="form-group mb-2">
+                <span>Price</span>
+                <div class="d-flex">
+                    <div style="width:30%">
+                        {{ form.min_price(class="form-control", placeholder="$min") }}
+                    </div>
+                    <div style="width:30%">
+                        {{ form.max_price(class="form-control", placeholder="$max") }}
+                    </div>
+                </div>
+            </div>
+            <div class="form-group d-flex mt-5">
+                {{ form.submit(class="btn btn-primary mr-1") }}
+                {{ form.show_all(class="btn btn-outline-secondary ml-1") }}
+            </div>
+        </fieldset>
+    </form>
+
+</div>
+<div class="main-content">
+
+    {% for product in products.items %}
+        <fieldset class="product-border">
+            <div class="left-content" style="padding:10;">
+                <img class="product-image" src="{{ url_for('static', filename='pictures/' +product.image) }}">
+            </div>
+            <div class="main-content" style="padding:10;">
+                <h1><a class="product-title" href="{{ url_for('this_product', id=product.id) }}">{{ product.name }}</a></h1>
+                <h3>Price: {{ "{:.2f}".format(product.price / 100) }}</h3>
+            </div>
+        </fieldset>
+    {% endfor %}
+
+    <footer class="ml-5">
+        {% for page_num in products.iter_pages(left_edge=2, left_current=1, right_current=2, right_edge=1) %}
+            {% if page_num %}
+                {% if page_num == page %}
+                    <a class="btn btn-info mb-4 mt-2" href="">{{ page_num }}</a>
+                {% else %}
+                    <a class="btn btn-outline-info mb-4 mt-2" href="{{ url_for('products', page=page_num, **args) }}">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="mt-5 mb-4">...</span>
+            {% endif %}
+        {% endfor %}
+    </footer>
+
+</div>
+
+
+{% endblock content %}

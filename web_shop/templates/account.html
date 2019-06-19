@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <div class="left-content">
+        <div class="container">
+                    <a href="{{ url_for('account', active='favourites', id=user.id) }}" class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'favourites' }}">Favourites</a>
+                    <a href="{{ url_for('account', active='address', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'address' }}">Your Address</a>
+                    <a href="{{ url_for('account', active='manage', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'manage' }}">Manage Account</a>
+        </div>
+    </div>
+    <article class="main-content">
+        {% if active == 'favourites' %}
+            <span>Favourites</span>
+        {% elif active == 'address' %}
+            <form method="POST" novalidate="novalidate">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group border p-5">
+                    <div class="row">
+                        <div class="form-group col">
+                            {{ form.first_name.label() }}
+
+                            {% if form.first_name.errors %}
+                                {{ form.first_name(class="form-control form-control-lg is-invalid", placeholder="first name") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.first_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.first_name(class="form-control form-control-lg", placeholder="first name") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group col">
+                            {{ form.last_name.label() }}
+
+                            {% if form.last_name.errors %}
+                                {{ form.last_name(class="form-control form-control-lg is-invalid", placeholder="last name") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.last_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.last_name(class="form-control form-control-lg", placeholder="last name") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{ form.street.label() }}
+
+                        {% if form.street.errors %}
+                            {{ form.street(class="form-control form-control-lg is-invalid", placeholder="street name") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.street.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.street(class="form-control form-control-lg", placeholder="street name") }}
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            {{ form.street_number.label() }}
+
+                            {% if form.street_number.errors %}
+                                {{ form.street_number(class="form-control form-control-lg is-invalid", placeholder="number") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.street_number.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.street_number(class="form-control form-control-lg", placeholder="number") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group col">
+                            {{ form.apartment_number.label() }}
+
+                            {% if form.apartment_number.errors %}
+                                {{ form.apartment_number(class="form-control form-control-lg is-invalid", placeholder="number") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.apartment_number.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.apartment_number(class="form-control form-control-lg", placeholder="number") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{ form.city.label() }}
+
+                        {% if form.city.errors %}
+                            {{ form.city(class="form-control form-control-lg is-invalid", placeholder="city") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.city.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.city(class="form-control form-control-lg", placeholder="city") }}
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            {{ form.postal_code.label() }}
+
+                            {% if form.postal_code.errors %}
+                                {{ form.postal_code(class="form-control form-control-lg is-invalid", placeholder="postal code") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.postal_code.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.postal_code(class="form-control form-control-lg", placeholder="postal code") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group col">
+                            {{ form.country.label() }}
+
+                            {% if form.country.errors %}
+                                {{ form.country(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.country.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.country(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-outline-primary", value="Update Address") }}
+                    </div>
+                </fieldset>
+            </form>
+
+        {% elif active == 'manage' %}
+            <span>manage</span>
+        {% endif %}
+    </article>
+
+{% endblock content %}
