@@ -64,12 +64,15 @@ class AddressForm(FlaskForm):
 
 class QuantityForm(FlaskForm):
 
+    product_id = IntegerField()
     quantity = IntegerField(label='quantity')
 
 
 class CartForm(FlaskForm):
 
     quantities = FieldList(FormField(QuantityForm))
+
+    submit = SubmitField(label='Buy cart form')
 
 
 
