@@ -12,6 +12,8 @@ pip install flask-wtf
 pip install flask-bcrypt
 
 pip install flask-sqlalchemy
+
+pip install requests
 ```
 
 ## features
