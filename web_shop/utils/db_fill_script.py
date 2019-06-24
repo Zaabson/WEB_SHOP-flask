@@ -44,7 +44,7 @@ for thing, text in zip(things, texts):
                        description=text, image=f'{thing}.jpg', date_added=datetime.utcnow())
     db.session.add(product1)
 
-user = User(email='setup@g.com', password='abcdefghijkl', has_address=False, first_name=None, last_name=None,
+user = User(email='setup@g.com', password='abcdefghijkl', true_user=True, has_address=False, first_name=None, last_name=None,
             street=None, street_number=None, apartment_number=None, city=None, postal_code=None, country=None)
 
 db.session.add(user)

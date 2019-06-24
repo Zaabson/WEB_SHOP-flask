@@ -1,31 +1,36 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div>
-    <div class="left-content">
-    </div>
-    <article class="main-content">
-        <table class="table">
+<div class="container">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">Product name</th>
-                    <th scope="col">price</th>
-                    <th scope="col">quantity</th>
+                  <td scope="col"></td>
+                  <td scope="col">product</td>
+                  <td scope="col">price</td>
+                  <td scope="col">quantity</td>
                 </tr>
             </thead>
             <tbody>
-                {% for product_id in cart.keys() %}
-                    {% set product = Product.query.filter_by(id=product_id).first() %}
+                {% for l in form.quantities %}
+                    {% set product = Product.query.filter_by(id=l.form.product_id.data).first() %}
+
+                    {{ l.hidden_tag() }}
                     <tr>
-                        <th class="row">{{ product.name }}</th>
-                        <td>{{ product.price }}</td>
-                        <td>{{ cart[product_id] }}</td>
+                        <td><img src="{{ url_for('static', filename='pictures/' + product.image) }}" class='img-thumbnail rounded product-image'></td>
+                        <th scope="row">{{ product.name }}</th>
+                        <td>{{ "{:.2f}".format(product.price / 100) }}</td>
+                        <td>{{ l.form.quantity(class='form-control form-control-lg') }}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    {{ form.submit(class='btn btn-outline-success btn-lg') }}
+                </tr>
             </tbody>
         </table>
-
-    </article>
+    </form>
 </div>
 
 

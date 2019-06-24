@@ -13,30 +13,30 @@
         <a class='bigtitle-link' href="{{ url_for('home') }}"><div class="bigtitle">WEB SHOP</div></a>
 
         <nav class="navbar-main">
-            <ul>
-                <li><a class="{{ 'active' if active == 'home' }}" href="{{ url_for('home') }}">Home</a></li>
-                <li><a class="{{ 'active' if active == 'products' }}" href="{{ url_for('products') }}">Products</a></li>
-                <li><a class="{{ 'active' if active == 'about' }}" href="{{ url_for('about') }}">About</a></li>
+            <ul class="main-nav">
+                <li class="main-nav"><a class="main-nav {{ 'active' if active == 'home' }}" href="{{ url_for('home') }}">Home</a></li>
+                <li class="main-nav"><a class="main-nav {{ 'active' if active == 'products' }}" href="{{ url_for('products') }}">Products</a></li>
+                <li class="main-nav"><a class="main-nav {{ 'active' if active == 'about' }}" href="{{ url_for('about') }}">About</a></li>
 
                 {% if current_user.is_authenticated %}
-                    <li style="float:right"><a class="{{ 'active' if active == 'account' }}" href="{{ url_for('account', id=current_user.id, active='favourites') }}">Account</a></li>
+                    <li style="float:right"><a class="main-nav {{ 'active' if active == 'account' }}" href="{{ url_for('account', id=current_user.id, active='favourites') }}">Account</a></li>
                 {% else %}
-                    <li style="float:right"><a class="{{ 'active' if active == 'login' }}" href="{{ url_for('login') }}">Login</a></li>
-                    <li style="float:right"><a class="{{ 'active' if active == 'register' }}" href="{{ url_for('register') }}">Create an Account</a></li>
+                    <li style="float:right"><a class="main-nav {{ 'active' if active == 'login' }}" href="{{ url_for('login') }}">Login</a></li>
+                    <li style="float:right"><a class="main-nav {{ 'active' if active == 'register' }}" href="{{ url_for('register') }}">Create an Account</a></li>
                 {% endif %}
 
-                <li style="float:right"><a data-toggle="modal" data-target="#exampleModal" href="">Your cart</a></li>
+                <li class='main-nav' style="float:right"><a class='main-nav' data-toggle="modal" data-target="#exampleModal" href="">Your cart</a></li>
             </ul>
         </nav>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
         {% endif %}
     {% endwith %}
 

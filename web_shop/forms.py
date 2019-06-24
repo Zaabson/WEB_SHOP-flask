@@ -43,16 +43,26 @@ class LoginForm(FlaskForm):
     submit = SubmitField(label='Login')
 
 
+class LoginAdminForm(FlaskForm):
+
+    username = PasswordField(label='username', validators=[DataRequired()])
+    password = PasswordField(label='password', validators=[DataRequired()])
+
+    submit = SubmitField(label='Login')
+
+
 class AddressForm(FlaskForm):
 
-    first_name = StringField(label='First name', validators=[DataRequired()])
-    last_name = StringField(label='Last name', validators=[DataRequired()])
+    first_name = StringField(label='First name', validators=[Optional()])
+    last_name = StringField(label='Last name', validators=[Optional()])
     street = StringField(label='Street name', validators=[DataRequired()])
     street_number = IntegerField(label="Street number", validators=[DataRequired()])
     apartment_number = IntegerField(label="Appartment number (optional)", validators=[Optional()])
     city = StringField(label="City", validators=[DataRequired()])
     country = SelectField(label="Country", choices=[(country, country) for country in country_list], default="Poland")
     postal_code = StringField(label="Postal code", validators=[DataRequired()])
+
+    remember_address = BooleanField(label='Remember Address?', validators=[Optional()])  # unused in account page, used when finalizing transaction
     submit = SubmitField()  # no label as this form will be used in few places
 
     def validate_postal_code(self, postal_code):

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+</head>
+<body>
+    <div class="container">
+        <ol>
+            {% for transaction in transactions %}
+            <li><ol>
+                {% for item in transaction.items %}
+                    <li>product_id: {{ item.product_id }}, quantity: {{ item.quantity }}</li>
+                {% endfor %}
+            </ol></li>
+            {% endfor %}
+        </ol>
+    </div>
+</body>
+</html>

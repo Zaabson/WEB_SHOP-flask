@@ -1,13 +1,14 @@
-import sys
+import sys, os
 from decimal import Decimal
+from datetime import datetime
 
 from flask import render_template, url_for, redirect, request, session, flash, abort
 from flask_login import login_user, current_user, login_required
 
 from web_shop import app, bcrypt, db
-from web_shop.forms import FilterForm, RegisterForm, LoginForm, AddressForm
-from web_shop.models import Product, User
-
+from web_shop.forms import FilterForm, RegisterForm, LoginForm, AddressForm, CartForm, LoginAdminForm
+from web_shop.models import Product, User, Transaction, TransactionItem
+from web_shop.cart import Cart
 
 @app.route('/')
 @app.route('/home')
@@ -116,10 +117,9 @@ def register():
 
     form = RegisterForm()
     if form.validate_on_submit():
-        print('registr validated', file=sys.stdout)
 
         hash = bcrypt.generate_password_hash(form.password.data)
-        user = User(email=form.email.data, password=hash)
+        user = User(email=form.email.data, password=hash, true_user=True)
         db.session.add(user)
         db.session.commit()
 
@@ -160,19 +160,21 @@ def account(id, active):
 
     user = User.query.get_or_404(id)
 
-    form = AddressForm()
+    address_form = AddressForm()
+    email_form = LoginForm()
+    #email_form.email.data = user.email
 
-    if form.validate_on_submit():
+    if address_form.validate_on_submit():
 
         user.has_address = True
-        user.first_name = form.first_name.data
-        user.last_name = form.last_name.data
-        user.street = form.street.data
-        user.street_number = form.street_number.data
-        user.apartment_number = form.apartment_number.data
-        user.city = form.city.data
-        user.country = form.country.data
-        user.postal_code = form.postal_code.data
+        user.first_name = address_form.first_name.data
+        user.last_name = address_form.last_name.data
+        user.street = address_form.street.data
+        user.street_number = address_form.street_number.data
+        user.apartment_number = address_form.apartment_number.data
+        user.city = address_form.city.data
+        user.country = address_form.country.data
+        user.postal_code = address_form.postal_code.data
 
         db.session.commit()
 
@@ -180,23 +182,109 @@ def account(id, active):
         return redirect(url_for('account', id=user.id, active='favourites'))
 
     if user.has_address:  # fill up form with address if user specified address already
-        form.first_name.data = user.first_name
-        form.last_name.data = user.last_name
-        form.street.data = user.street
-        form.street_number.data = user.street_number
-        form.apartment_number.data = user.apartment_number
-        form.city.data = user.city
-        form.country.data = user.country
-        form.postal_code.data = user.postal_code
+        address_form.first_name.data = user.first_name
+        address_form.last_name.data = user.last_name
+        address_form.street.data = user.street
+        address_form.street_number.data = user.street_number
+        address_form.apartment_number.data = user.apartment_number
+        address_form.city.data = user.city
+        address_form.country.data = user.country
+        address_form.postal_code.data = user.postal_code
 
-    return render_template('account.html', title='Your Account', user=user, active=active, form=form, cart=session.get('cart'), Product=Product)
+    return render_template('account.html', title='Your Account', user=user, active=active,
+                           address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form)
 
 
 @app.route('/checkout', methods=['POST', 'GET'])
 def checkout():
 
     if 'cart' not in session:
-        flash('Your cart is empty')
+        flash('Your cart is empty', category='info')
         return redirect(url_for('home'))
 
-    return render_template('checkout.html', cart=session.get('cart'), Product=Product)
+    quantities = [{'product_id': int(product_id), 'quantity': int(quantity)} for product_id, quantity in session['cart'].items()]
+    form = CartForm(quantities=quantities)
+
+    if form.validate_on_submit():
+        cart = Cart.from_form_data(form.quantities.data)
+        session['cart'] = cart.for_session()
+        session.modified = True
+        if current_user.is_authenticated:
+            if current_user.has_address:
+                return redirect(url_for('finalize_transaction_user_with_address'))
+            else:
+                return redirect(url_for('finalize_transa    ction_user_without_address'))
+        else:
+            return redirect(url_for('finalize_transaction_anonymous'))
+
+    return render_template('checkout.html', cart=session.get('cart'), Product=Product, form=form)
+
+
+def get_total_price(cart):
+    total = sum((Product.query.get(int(id)).price * quantity for id, quantity in cart.items()))
+    return total
+
+
+@app.route('/checkout/finalize/1')
+@login_required
+def finalize_transaction_user_with_address():
+    pass
+
+
+@app.route('/checkout/finalize/2')
+@login_required
+def finalize_transaction_user_without_address():
+    pass
+
+
+@app.route('/checkout/finalize/3', methods=['GET', 'POST'])
+def finalize_transaction_anonymous():
+
+    if 'cart' not in session:
+        flash('Your cart is empty')
+        return redirect('home')
+
+    total_price = get_total_price(session.get('cart'))
+    form = AddressForm()
+
+    if form.validate_on_submit():
+
+        user = User(true_user=False, has_address=True, first_name=form.first_name.data, last_name=form.last_name.data,
+                    street=form.street.data, street_number=form.street_number.data, apartment_number=form.apartment_number.data,
+                    city=form.city.data, country=form.country.data, postal_code=form.postal_code.data)
+
+        transaction = Transaction(date=datetime.now(), status='new', buyer=user)
+
+        transaction_items = []
+        for id, quantity in session.get('cart').items():
+            transaction_item = TransactionItem(product_id=int(id), quantity=quantity, transaction=transaction)
+            transaction_items.append(transaction_item)
+
+        db.session.add(user)
+        db.session.add(transaction)
+        for item in transaction_items:
+            db.session.add(item)
+        db.session.commit()
+
+        flash('Your order has been submitted', category='success')
+        return redirect(url_for('home'))
+
+    return render_template('finalize_transaction_anonymous.html', form=form,
+                           cart=session.get('cart'), Product=Product, total_price=total_price)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+
+    form = LoginAdminForm()
+
+    if form.validate_on_submit():
+
+        if form.username.data == os.environ.get('ADMIN_USERNAME') and form.password.data == os.environ.get('ADMIN_PASSWORD'):
+            transactions = Transaction.query.all()
+            return render_template('admin_page.html', transactions=transactions)
+        else:
+            flash('Wrong credentials!', category='danger')
+            return redirect(url_for('home'))
+
+    return render_template('admin_login.html', form=form)

@@ -7,14 +7,18 @@ from web_shop import db, login_manager
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    user = User.query.get(int(user_id))
+    if user:
+        if user.true_user:  # has email and password, is able to log in, otherwise User() only stores address
+            return user
 
 
 class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    email = db.Column(db.String(80), nullable=False, unique=True)
-    password = db.Column(db.String(), nullable=False)
+    email = db.Column(db.String(80), nullable=True, unique=True)
+    password = db.Column(db.String(), nullable=True)
+    true_user = db.Column(db.Boolean(), default=False, nullable=False)  # if false means that User() object is used to store address for transaction only
 
     has_address = db.Column(db.Boolean(), default=False, nullable=False)
     first_name = db.Column(db.String(), nullable=True)
@@ -54,6 +58,7 @@ class Transaction(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     buyer_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=True)
+    status = db.Column(db.String(), nullable=False)
 
     items = db.relationship('TransactionItem', backref='transaction', lazy=True)
 
@@ -62,5 +67,5 @@ class TransactionItem(db.Model):
 
     id = db.Column(db.Integer(), primary_key=True)
     transaction_id = db.Column(db.Integer(), db.ForeignKey('transaction.id'))
-    product_id = db.Column(db.Integer(), db.ForeignKey('product.id'))
+    product_id = db.Column(db.Integer())
     quantity = db.Column(db.Integer())
