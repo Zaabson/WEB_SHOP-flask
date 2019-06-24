@@ -5,6 +5,13 @@
     <article class="main-content">
         <h1>{{ product.name }}</h1>
         <h3>{{ product.description }}</h3>
-        <a class='btn btn-success' href="{{ url_for('add_to_cart', id=product.id) }}">Add to cart</a>
+        <a class='btn btn-success' href="{{ url_for('add_to_cart', product_id=product.id) }}">Add to cart</a>
+        {% if current_user.is_authenticated %}
+            {% if in_favourites %}
+                <a class='btn btn-success' href="{{ url_for('add_or_remove_from_favourites', product_id=product.id) }}">Remove from Favourites</a>
+            {% else %}
+                <a class='btn btn-outline-success' href="{{ url_for('add_or_remove_from_favourites', product_id=product.id) }}">Add to Favourites</a>
+            {% endif %}
+        {% endif %}
     </article>
 {% endblock content %}

@@ -82,27 +82,43 @@ def products():
 @app.route('/products/<int:id>')
 def this_product(id):
     product = Product.query.filter_by(id=id).first()
-    return render_template('this_product.html', title=product.name,
+    in_favourites = id in set((product.id for product in current_user.favourites))  # product is already in users favourites
+    return render_template('this_product.html', title=product.name, in_favourites=in_favourites,
                            product=product, cart=session.get('cart'), Product=Product, show_modal=False)
 
 
-@app.route('/products/<int:id>/add+to+cart')
-def add_to_cart(id):
+@app.route('/products/<int:product_id>/add+to+cart')
+def add_to_cart(product_id):
 
     product = Product.query.filter_by(id=id).first()
-    id = str(id)  # somehow it was giving strange bug with id as int
+    product_id = str(product_id)  # somehow it was giving strange bug with id as int
 
     if 'cart' in session:
-        if id in session['cart'].keys():
-            session['cart'][id] += 1
+        if product_id in session['cart'].keys():
+            session['cart'][product_id] += 1
         else:
-            session['cart'][id] = 1
+            session['cart'][product_id] = 1
     else:
-        session['cart'] = {id: 1}
+        session['cart'] = {product_id: 1}
 
     session.modified = True
 
     return render_template('this_product.html', show_modal=True, title=product.name, product=product, cart=session.get('cart'), Product=Product)
+
+
+@app.route('/products/<int:product_id>/add+to+favourites')
+@login_required
+def add_or_remove_from_favourites(product_id):
+
+    in_favourites = product_id in set((product.id for product in current_user.favourites))  # product is already in users favourites
+    product = Product.query.get(product_id)
+    if in_favourites:
+        current_user.favourites.remove(product)
+    else:
+        product.lover.append(current_user)
+    db.session.commit()
+
+    return redirect(url_for('this_product', id=product_id))
 
 
 @app.route('/about')
@@ -160,6 +176,7 @@ def account(id, active):
         abort(403)
 
     user = User.query.get_or_404(id)
+    favourite_products = user.favourites
 
     address_form = AddressForm()
     email_form = UpdateEmailForm()
@@ -210,7 +227,7 @@ def account(id, active):
         address_form.country.data = user.country
         address_form.postal_code.data = user.postal_code
 
-    return render_template('account.html', title='Your Account', user=user, active=active,
+    return render_template('account.html', title='Your Account', user=user, active=active, favourite_products=favourite_products,
                            address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form)
 
 

@@ -59,8 +59,8 @@ class LoginAdminForm(FlaskForm):
 
 class AddressForm(FlaskForm):
 
-    first_name = StringField(label='First name', validators=[Optional()])
-    last_name = StringField(label='Last name', validators=[Optional()])
+    first_name = StringField(label='First name (optional)', validators=[Optional()])
+    last_name = StringField(label='Last name (optional)', validators=[Optional()])
     street = StringField(label='Street name', validators=[DataRequired()])
     street_number = IntegerField(label="Street number", validators=[DataRequired()])
     apartment_number = IntegerField(label="Appartment number (optional)", validators=[Optional()])

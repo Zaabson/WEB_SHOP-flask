@@ -13,6 +13,11 @@ def load_user(user_id):
             return user
 
 
+favourites = db.Table('favourites',
+                      db.Column('user_id', db.Integer(), db.ForeignKey('user.id'), primary_key=True),
+                      db.Column('product_id', db.Integer(), db.ForeignKey('product.id'), primary_key=True))
+
+
 class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
@@ -31,6 +36,7 @@ class User(db.Model, UserMixin):
     postal_code = db.Column(db.String(), nullable=True)
 
     transactions = db.relationship('Transaction', backref='buyer', lazy=True)
+    favourites = db.relationship('Product', secondary=favourites, lazy='subquery', backref=db.backref('lover', lazy=True))
 
     def __repr__(self):
         return f"User(id={self.id}, email={self.email}, has_address={self.has_address})"
