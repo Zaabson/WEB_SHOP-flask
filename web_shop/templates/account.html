@@ -3,6 +3,7 @@
 
     <div class="left-content">
         <div class="container">
+                    <a href="{{ url_for('account', active='orders', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'orders' }}">Your Orders</a>
                     <a href="{{ url_for('account', active='favourites', id=user.id) }}" class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'favourites' }}">Favourites</a>
                     <a href="{{ url_for('account', active='address', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'address' }}">Your Address</a>
                     <a href="{{ url_for('account', active='manage', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'manage' }}">Manage Account</a>
@@ -11,6 +12,8 @@
     <article class="main-content">
         {% if active == 'favourites' %}
             <span>Favourites</span>
+        {% elif active == 'orders' %}
+            <span>Your orders</span>
         {% elif active == 'address' %}
             <form method="POST" novalidate="novalidate">
                 {{ address_form.hidden_tag() }}

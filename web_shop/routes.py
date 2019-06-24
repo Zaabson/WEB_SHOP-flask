@@ -1,14 +1,15 @@
-import sys, os
-from decimal import Decimal
+import os
 from datetime import datetime
+from decimal import Decimal
 
 from flask import render_template, url_for, redirect, request, session, flash, abort
 from flask_login import login_user, current_user, login_required
 
 from web_shop import app, bcrypt, db
+from web_shop.cart import Cart
 from web_shop.forms import FilterForm, RegisterForm, LoginForm, AddressForm, CartForm, LoginAdminForm
 from web_shop.models import Product, User, Transaction, TransactionItem
-from web_shop.cart import Cart
+
 
 @app.route('/')
 @app.route('/home')
@@ -210,41 +211,66 @@ def checkout():
         session['cart'] = cart.for_session()
         session.modified = True
         if current_user.is_authenticated:
-            if current_user.has_address:
-                return redirect(url_for('finalize_transaction_user_with_address'))
-            else:
-                return redirect(url_for('finalize_transa    ction_user_without_address'))
+            return redirect(url_for('finalize_transaction_user'))
         else:
             return redirect(url_for('finalize_transaction_anonymous'))
 
     return render_template('checkout.html', cart=session.get('cart'), Product=Product, form=form)
 
 
-def get_total_price(cart):
-    total = sum((Product.query.get(int(id)).price * quantity for id, quantity in cart.items()))
-    return total
-
-
-@app.route('/checkout/finalize/1')
+@app.route('/checkout/finalize/1', methods=['POST', 'GET'])
 @login_required
-def finalize_transaction_user_with_address():
-    pass
+def finalize_transaction_user():
+
+    if 'cart' not in session:
+        flash('Your cart is empty')
+        return redirect('home')
+
+    cart = Cart(session.get('cart'))
+    total_price = cart.get_total_price()
+    form = AddressForm()
+
+    if current_user.has_address:
+
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.street.data = current_user.street
+        form.street_number.data = current_user.street_number
+        form.apartment_number.data = current_user.apartment_number
+        form.city.data = current_user.city
+        form.country.data = current_user.country
+        form.postal_code.data = current_user.postal_code
+
+    if form.validate_on_submit():
+
+        transaction = Transaction(date=datetime.now(), status='new', buyer=current_user)
+
+        transaction_items = []
+        for id, quantity in session.get('cart').items():
+            transaction_item = TransactionItem(product_id=int(id), quantity=quantity, transaction=transaction)
+            transaction_items.append(transaction_item)
+
+        db.session.add(transaction)
+        for item in transaction_items:
+            db.session.add(item)
+        db.session.commit()
+
+        flash('Your order has been submitted. You can track progress in "Account" page', category='success')
+        return redirect(url_for('home'))
+
+    return render_template('finalize_transaction_user.html', form=form,
+                           cart=session.get('cart'), Product=Product, total_price=total_price)
 
 
-@app.route('/checkout/finalize/2')
-@login_required
-def finalize_transaction_user_without_address():
-    pass
-
-
-@app.route('/checkout/finalize/3', methods=['GET', 'POST'])
+@app.route('/checkout/finalize/2', methods=['GET', 'POST'])
 def finalize_transaction_anonymous():
 
     if 'cart' not in session:
         flash('Your cart is empty')
         return redirect('home')
 
-    total_price = get_total_price(session.get('cart'))
+    cart = Cart(session.get('cart'))
+    total_price = cart.get_total_price()
     form = AddressForm()
 
     if form.validate_on_submit():

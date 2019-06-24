@@ -1,3 +1,4 @@
+from web_shop.models import Product
 
 
 class Cart:
@@ -20,6 +21,10 @@ class Cart:
     def for_form(self):
         a = [{'product_id': key, 'quantity': value} for key, value in self.dict.items()]
         return a
+
+    def get_total_price(self):
+        total = sum((Product.query.get(int(id)).price * quantity for id, quantity in self.dict.items()))
+        return total
 
     # def keys(self):
     #     return self.dict.keys()
