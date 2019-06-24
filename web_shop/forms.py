@@ -43,6 +43,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField(label='Login')
 
 
+class UpdateEmailForm(FlaskForm):
+
+    email = StringField(label='Email', validators=[DataRequired(), Email()])
+    submit = SubmitField(label='Update Email')
+
+
 class LoginAdminForm(FlaskForm):
 
     username = PasswordField(label='username', validators=[DataRequired()])

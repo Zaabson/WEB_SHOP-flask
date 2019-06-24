@@ -3,11 +3,11 @@ from datetime import datetime
 from decimal import Decimal
 
 from flask import render_template, url_for, redirect, request, session, flash, abort
-from flask_login import login_user, current_user, login_required
+from flask_login import login_user, current_user, login_required, logout_user
 
 from web_shop import app, bcrypt, db
 from web_shop.cart import Cart
-from web_shop.forms import FilterForm, RegisterForm, LoginForm, AddressForm, CartForm, LoginAdminForm
+from web_shop.forms import FilterForm, RegisterForm, LoginForm, AddressForm, CartForm, LoginAdminForm, UpdateEmailForm
 from web_shop.models import Product, User, Transaction, TransactionItem
 
 
@@ -162,8 +162,7 @@ def account(id, active):
     user = User.query.get_or_404(id)
 
     address_form = AddressForm()
-    email_form = LoginForm()
-    #email_form.email.data = user.email
+    email_form = UpdateEmailForm()
 
     if address_form.validate_on_submit():
 
@@ -180,7 +179,26 @@ def account(id, active):
         db.session.commit()
 
         flash("Your address has been updated. You won't need to type it next time you shop!", category="success")
-        return redirect(url_for('account', id=user.id, active='favourites'))
+        return redirect(url_for('account', id=user.id, active='address'))
+
+    if email_form.validate_on_submit():
+
+        if user.email == email_form.email.data:
+            flash("It's the same lol", category='info')
+            return redirect(url_for('account', id=user.id, active='manage'))
+        else:
+            user2 = User.query.filter_by(email=email_form.email.data).first()
+            if user2:
+                flash("There already exist account with this email.", category='danger')
+                return redirect(url_for('account', id=user.id, active='manage'))
+            else:
+                user.email = email_form.email.data
+                db.session.commit()
+                flash('Your email has been changed!', category='success')
+                return redirect(url_for('account', id=user.id, active='manage'))
+
+    else:
+        email_form.email.data = user.email
 
     if user.has_address:  # fill up form with address if user specified address already
         address_form.first_name.data = user.first_name
@@ -194,6 +212,15 @@ def account(id, active):
 
     return render_template('account.html', title='Your Account', user=user, active=active,
                            address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form)
+
+
+@app.route('/logout/<int:id>')
+@login_required
+def logout(id):  # TODO add link to this route somewhere
+    if current_user.id == id:
+        logout_user()
+
+    return redirect(url_for('login'))
 
 
 @app.route('/checkout', methods=['POST', 'GET'])

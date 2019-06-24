@@ -145,10 +145,26 @@
         {% elif active == 'manage' %}
         <div class="container float-left" style="width: 50%">
             <div class="row">
-                <form class="col-sm" disabled>
-                    {{ email_form.email(class='form-control form-control-lg') }}
+                <form method="POST" novalidate="novalidate">
+                    {{ email_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ email_form.email.label() }}
+
+                        {% if email_form.email.errors %}
+                            {{ email_form.email(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in email_form.email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ email_form.email(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ email_form.submit(class="btn btn-outline-primary", value="Update email") }}
+                    </div>
                 </form>
-                <a class="btn btn-outline-info" href=""><span class="align">Change email</span></a>
             </div>
         </div>
         {% endif %}
