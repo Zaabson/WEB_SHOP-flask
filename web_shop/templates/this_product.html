@@ -3,15 +3,25 @@
     <div class="left-content">
     </div>
     <article class="main-content">
-        <h1>{{ product.name }}</h1>
-        <h3>{{ product.description }}</h3>
-        <a class='btn btn-primary' href="{{ url_for('add_to_cart', product_id=product.id) }}">Add to cart</a>
-        {% if current_user.is_authenticated %}
-            {% if in_favourites %}
-                <a class='btn btn-success' href="{{ url_for('add_or_remove_from_favourites', product_id=product.id) }}">Remove from Favourites</a>
-            {% else %}
-                <a class='btn btn-outline-success' href="{{ url_for('add_or_remove_from_favourites', product_id=product.id) }}">Add to Favourites</a>
-            {% endif %}
-        {% endif %}
+        <div class="d-flex mb-4">
+            <div class="row">
+                <div class="col">
+                    <h1 class="mb-3">{{ product.name }}</h1>
+                    <h5>Price: <span class="font-weight-bold">{{ "{:.2f}".format(product.price / 100) }}</span></h5>
+                    <a class='btn btn-primary' href="{{ url_for('add_to_cart', product_id=product.id) }}">Add to cart</a>
+                    {% if current_user.is_authenticated %}
+                        {% if in_favourites %}
+                            <a class='btn btn-success' href="{{ url_for('add_or_remove_from_favourites', product_id=product.id) }}">Remove from Favourites</a>
+                        {% else %}
+                            <a class='btn btn-outline-success' href="{{ url_for('add_or_remove_from_favourites', product_id=product.id) }}">Add to Favourites</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <img class="product-image" src="{{ url_for('static', filename='pictures/' + product.image) }}">
+            </div>
+        </div>
+        <h5>Description: </h5>
+        <p>{{ product.description }}</p>
+
     </article>
 {% endblock content %}
