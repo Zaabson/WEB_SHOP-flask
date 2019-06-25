@@ -3,14 +3,14 @@
 
     <div class="left-content">
         <div class="container">
-                    <a href="{{ url_for('account', active='orders', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'orders' }}">Your Orders</a>
-                    <a href="{{ url_for('account', active='favourites', id=user.id) }}" class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'favourites' }}">Favourites</a>
-                    <a href="{{ url_for('account', active='address', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'address' }}">Your Address</a>
-                    <a href="{{ url_for('account', active='manage', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active == 'manage' }}">Manage Account</a>
+                    <a href="{{ url_for('account', active_tab='orders', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'orders' }}">Your Orders</a>
+                    <a href="{{ url_for('account', active_tab='favourites', id=user.id) }}" class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'favourites' }}">Favourites</a>
+                    <a href="{{ url_for('account', active_tab='address', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'address' }}">Your Address</a>
+                    <a href="{{ url_for('account', active_tab='manage', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'manage' }}">Manage Account</a>
         </div>
     </div>
     <article class="main-content">
-        {% if active == 'favourites' %}
+        {% if active_tab == 'favourites' %}
             <div class="container border">
                 {% for product in favourite_products %}
                     <fieldset class="product-border">
@@ -24,9 +24,9 @@
                     </fieldset>
                 {% endfor %}
             </div>
-        {% elif active == 'orders' %}
+        {% elif active_tab == 'orders' %}
             <span>Your orders</span>
-        {% elif active == 'address' %}
+        {% elif active_tab == 'address' %}
             <form method="POST" novalidate="novalidate">
                 {{ address_form.hidden_tag() }}
                 <fieldset class="form-group border p-5">
@@ -154,7 +154,7 @@
                 </fieldset>
             </form>
 
-        {% elif active == 'manage' %}
+        {% elif active_tab == 'manage' %}
         <div class="container float-left" style="width: 50%">
             <div class="row">
                 <form method="POST" novalidate="novalidate">

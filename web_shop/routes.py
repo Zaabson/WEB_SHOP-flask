@@ -167,9 +167,9 @@ def login():
     return render_template('login.html', title="Login", active='login', form=form, cart=session.get('cart'), Product=Product)
 
 
-@app.route('/account/<int:id>/<string:active>', methods=['GET', 'POST'])
+@app.route('/account/<int:id>/<string:active_tab>', methods=['GET', 'POST'])
 @login_required
-def account(id, active):
+def account(id, active_tab):
     id = int(id)
     if current_user.id != id:
         flash('Log in first', category='danger')
@@ -196,23 +196,23 @@ def account(id, active):
         db.session.commit()
 
         flash("Your address has been updated. You won't need to type it next time you shop!", category="success")
-        return redirect(url_for('account', id=user.id, active='address'))
+        return redirect(url_for('account', id=user.id, active_tab='address'))
 
     if email_form.validate_on_submit():
 
         if user.email == email_form.email.data:
             flash("It's the same lol", category='info')
-            return redirect(url_for('account', id=user.id, active='manage'))
+            return redirect(url_for('account', id=user.id, active_tab='manage'))
         else:
             user2 = User.query.filter_by(email=email_form.email.data).first()
             if user2:
                 flash("There already exist account with this email.", category='danger')
-                return redirect(url_for('account', id=user.id, active='manage'))
+                return redirect(url_for('account', id=user.id, active_tab='manage'))
             else:
                 user.email = email_form.email.data
                 db.session.commit()
                 flash('Your email has been changed!', category='success')
-                return redirect(url_for('account', id=user.id, active='manage'))
+                return redirect(url_for('account', id=user.id, active_tab='manage'))
 
     else:
         email_form.email.data = user.email
@@ -227,16 +227,14 @@ def account(id, active):
         address_form.country.data = user.country
         address_form.postal_code.data = user.postal_code
 
-    return render_template('account.html', title='Your Account', user=user, active=active, favourite_products=favourite_products,
+    return render_template('account.html', title='Your Account', user=user, active='account', active_tab=active_tab, favourite_products=favourite_products,
                            address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form)
 
 
-@app.route('/logout/<int:id>')
+@app.route('/logout')
 @login_required
-def logout(id):  # TODO add link to this route somewhere
-    if current_user.id == id:
-        logout_user()
-
+def logout():
+    logout_user()
     return redirect(url_for('login'))
 
 
