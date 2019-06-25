@@ -20,7 +20,7 @@
 
                 {% if current_user.is_authenticated %}
                     <li style="float:right"><a class="main-nav" href="{{ url_for('logout') }}">Logout</a></li>
-                    <li style="float:right"><a class="main-nav {{ 'active' if active == 'account' }}" href="{{ url_for('account', id=current_user.id, active_tab='favourites') }}">Account</a></li>
+                    <li style="float:right"><a class="main-nav {{ 'active' if active == 'account' }}" href="{{ url_for('account', user_id=current_user.id, active_tab='favourites') }}">Account</a></li>
                 {% else %}
                     <li style="float:right"><a class="main-nav {{ 'active' if active == 'login' }}" href="{{ url_for('login') }}">Login</a></li>
                     <li style="float:right"><a class="main-nav {{ 'active' if active == 'register' }}" href="{{ url_for('register') }}">Create an Account</a></li>

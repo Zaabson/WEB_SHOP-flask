@@ -41,7 +41,7 @@
                 <img class="product-image" src="{{ url_for('static', filename='pictures/' +product.image) }}">
             </div>
             <div class="main-content" style="padding:10;">
-                <h1><a class="product-title" href="{{ url_for('this_product', id=product.id) }}">{{ product.name }}</a></h1>
+                <h1><a class="product-title" href="{{ url_for('this_product', product_id=product.id) }}">{{ product.name }}</a></h1>
                 <h3>Price: {{ "{:.2f}".format(product.price / 100) }}</h3>
             </div>
         </fieldset>

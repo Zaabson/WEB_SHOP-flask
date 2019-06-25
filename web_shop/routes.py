@@ -79,10 +79,10 @@ def products():
                            form=form, page=page, args=args, cart=session.get('cart'), Product=Product, show_modal=False)
 
 
-@app.route('/products/<int:id>')
-def this_product(id):
-    product = Product.query.filter_by(id=id).first()
-    in_favourites = id in set((product.id for product in current_user.favourites))  # product is already in users favourites
+@app.route('/products/<int:product_id>')
+def this_product(product_id):
+    product = Product.query.filter_by(id=product_id).first()
+    in_favourites = product_id in set((product.id for product in current_user.favourites))  # product is already in users favourites
     return render_template('this_product.html', title=product.name, in_favourites=in_favourites,
                            product=product, cart=session.get('cart'), Product=Product, show_modal=False)
 
@@ -90,7 +90,7 @@ def this_product(id):
 @app.route('/products/<int:product_id>/add+to+cart')
 def add_to_cart(product_id):
 
-    product = Product.query.filter_by(id=id).first()
+    product = Product.query.filter_by(id=product_id).first()
     product_id = str(product_id)  # somehow it was giving strange bug with id as int
 
     if 'cart' in session:
@@ -118,7 +118,7 @@ def add_or_remove_from_favourites(product_id):
         product.lover.append(current_user)
     db.session.commit()
 
-    return redirect(url_for('this_product', id=product_id))
+    return redirect(url_for('this_product', product_id=product_id))
 
 
 @app.route('/about')
@@ -167,15 +167,15 @@ def login():
     return render_template('login.html', title="Login", active='login', form=form, cart=session.get('cart'), Product=Product)
 
 
-@app.route('/account/<int:id>/<string:active_tab>', methods=['GET', 'POST'])
+@app.route('/account/<int:user_id>/<string:active_tab>', methods=['GET', 'POST'])
 @login_required
-def account(id, active_tab):
-    id = int(id)
-    if current_user.id != id:
+def account(user_id, active_tab):
+    user_id = int(user_id)
+    if current_user.id != user_id:
         flash('Log in first', category='danger')
         abort(403)
 
-    user = User.query.get_or_404(id)
+    user = User.query.get_or_404(user_id)
     favourite_products = user.favourites
 
     address_form = AddressForm()
@@ -196,23 +196,23 @@ def account(id, active_tab):
         db.session.commit()
 
         flash("Your address has been updated. You won't need to type it next time you shop!", category="success")
-        return redirect(url_for('account', id=user.id, active_tab='address'))
+        return redirect(url_for('account', user_id=user.id, active_tab='address'))
 
     if email_form.validate_on_submit():
 
         if user.email == email_form.email.data:
             flash("It's the same lol", category='info')
-            return redirect(url_for('account', id=user.id, active_tab='manage'))
+            return redirect(url_for('account', user_id=user.id, active_tab='manage'))
         else:
             user2 = User.query.filter_by(email=email_form.email.data).first()
             if user2:
                 flash("There already exist account with this email.", category='danger')
-                return redirect(url_for('account', id=user.id, active_tab='manage'))
+                return redirect(url_for('account', user_id=user.id, active_tab='manage'))
             else:
                 user.email = email_form.email.data
                 db.session.commit()
                 flash('Your email has been changed!', category='success')
-                return redirect(url_for('account', id=user.id, active_tab='manage'))
+                return redirect(url_for('account', user_id=user.id, active_tab='manage'))
 
     else:
         email_form.email.data = user.email
@@ -288,8 +288,8 @@ def finalize_transaction_user():
         transaction = Transaction(date=datetime.now(), status='new', buyer=current_user)
 
         transaction_items = []
-        for id, quantity in session.get('cart').items():
-            transaction_item = TransactionItem(product_id=int(id), quantity=quantity, transaction=transaction)
+        for product_id, quantity in session.get('cart').items():
+            transaction_item = TransactionItem(product_id=int(product_id), quantity=quantity, transaction=transaction)
             transaction_items.append(transaction_item)
 
         db.session.add(transaction)
@@ -324,8 +324,8 @@ def finalize_transaction_anonymous():
         transaction = Transaction(date=datetime.now(), status='new', buyer=user)
 
         transaction_items = []
-        for id, quantity in session.get('cart').items():
-            transaction_item = TransactionItem(product_id=int(id), quantity=quantity, transaction=transaction)
+        for product_id, quantity in session.get('cart').items():
+            transaction_item = TransactionItem(product_id=int(product_id), quantity=quantity, transaction=transaction)
             transaction_items.append(transaction_item)
 
         db.session.add(user)

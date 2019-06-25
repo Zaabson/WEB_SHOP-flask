@@ -3,10 +3,10 @@
 
     <div class="left-content">
         <div class="container">
-                    <a href="{{ url_for('account', active_tab='orders', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'orders' }}">Your Orders</a>
-                    <a href="{{ url_for('account', active_tab='favourites', id=user.id) }}" class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'favourites' }}">Favourites</a>
-                    <a href="{{ url_for('account', active_tab='address', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'address' }}">Your Address</a>
-                    <a href="{{ url_for('account', active_tab='manage', id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'manage' }}">Manage Account</a>
+                    <a href="{{ url_for('account', active_tab='orders', user_id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'orders' }}">Your Orders</a>
+                    <a href="{{ url_for('account', active_tab='favourites', user_id=user.id) }}" class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'favourites' }}">Favourites</a>
+                    <a href="{{ url_for('account', active_tab='address', user_id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'address' }}">Your Address</a>
+                    <a href="{{ url_for('account', active_tab='manage', user_id=user.id) }}"  class="btn btn-outline-dark btn-lg btn-block {{ 'active' if active_tab == 'manage' }}">Manage Account</a>
         </div>
     </div>
     <article class="main-content">
@@ -18,7 +18,7 @@
                             <img class="product-image" src="{{ url_for('static', filename='pictures/' +product.image) }}">
                         </div>
                         <div class="main-content" style="padding:10;">
-                            <h1><a class="product-title" href="{{ url_for('this_product', id=product.id) }}">{{ product.name }}</a></h1>
+                            <h1><a class="product-title" href="{{ url_for('this_product', product_id=product.id) }}">{{ product.name }}</a></h1>
                             <h3>Price: {{ "{:.2f}".format(product.price / 100) }}</h3>
                         </div>
                     </fieldset>
