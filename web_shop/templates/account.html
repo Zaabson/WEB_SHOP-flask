@@ -25,7 +25,24 @@
                 {% endfor %}
             </div>
         {% elif active_tab == 'orders' %}
-            <span>Your orders</span>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>status</th>
+                        <th>date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in your_orders %}
+                        <tr>
+                            <td>{{ transaction.id }}</td>
+                            <td>{{ transaction.status }}</td>
+                            <td>{{ transaction.date }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% elif active_tab == 'address' %}
             <form method="POST" novalidate="novalidate">
                 {{ address_form.hidden_tag() }}

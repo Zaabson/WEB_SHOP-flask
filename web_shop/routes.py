@@ -82,7 +82,11 @@ def products():
 @app.route('/products/<int:product_id>')
 def this_product(product_id):
     product = Product.query.filter_by(id=product_id).first()
-    in_favourites = product_id in set((product.id for product in current_user.favourites))  # product is already in users favourites
+    if current_user.is_authenticated:
+        in_favourites = product_id in set((product.id for product in current_user.favourites))  # product is already favourites
+    else:
+        in_favourites = None
+
     return render_template('this_product.html', title=product.name, in_favourites=in_favourites,
                            product=product, cart=session.get('cart'), Product=Product, show_modal=False)
 
@@ -177,6 +181,7 @@ def account(user_id, active_tab):
 
     user = User.query.get_or_404(user_id)
     favourite_products = user.favourites
+    your_orders = user.transactions
 
     address_form = AddressForm()
     email_form = UpdateEmailForm()
@@ -228,7 +233,7 @@ def account(user_id, active_tab):
         address_form.postal_code.data = user.postal_code
 
     return render_template('account.html', title='Your Account', user=user, active='account', active_tab=active_tab, favourite_products=favourite_products,
-                           address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form)
+                           address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form, your_orders=your_orders)
 
 
 @app.route('/logout')
@@ -296,6 +301,7 @@ def finalize_transaction_user():
         for item in transaction_items:
             db.session.add(item)
         db.session.commit()
+        del session['cart']  # cart is empty now
 
         flash('Your order has been submitted. You can track progress in "Account" page', category='success')
         return redirect(url_for('home'))
@@ -333,6 +339,7 @@ def finalize_transaction_anonymous():
         for item in transaction_items:
             db.session.add(item)
         db.session.commit()
+        del session['cart']
 
         flash('Your order has been submitted', category='success')
         return redirect(url_for('home'))
