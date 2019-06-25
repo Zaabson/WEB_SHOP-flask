@@ -21,11 +21,11 @@ pip install requests
 - sorting and filtering of products
 - creation of an account
 - cart stored in session
-- processing of a transaction in progress
 
 ## yet to implement
 
-- processing of a transaction
+- paying
 - change the look of some sites
-- favourites
+- transaction table on admin page
+- change password with email link
 - a lot
