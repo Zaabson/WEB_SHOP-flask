@@ -1,19 +1,8 @@
 # Sample shop website made with flask 
 
 ## prerequisities
-
 ```
-pip install flask
-
-pip install flask-login
-
-pip install flask-wtf
-
-pip install flask-bcrypt
-
-pip install flask-sqlalchemy
-
-pip install requests
+pip install -r requirements.txt
 ```
 
 ## features
