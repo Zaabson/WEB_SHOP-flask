@@ -4,10 +4,12 @@ from decimal import Decimal
 
 from flask import render_template, url_for, redirect, request, session, flash, abort
 from flask_login import login_user, current_user, login_required, logout_user
+from flask_mail import Message
 
-from web_shop import app, bcrypt, db
+from web_shop import app, bcrypt, db, mail
 from web_shop.cart import Cart
-from web_shop.forms import FilterForm, RegisterForm, LoginForm, AddressForm, CartForm, LoginAdminForm, UpdateEmailForm
+from web_shop.forms import (FilterForm, RegisterForm, LoginForm, AddressForm, CartForm, UpdatePasswordForm, LoginAdminForm, UpdateEmailForm,
+                            UpdatePasswordFormForLogged)
 from web_shop.models import Product, User, Transaction, TransactionItem
 
 
@@ -236,6 +238,69 @@ def account(user_id, active_tab):
                            address_form=address_form, cart=session.get('cart'), Product=Product, email_form=email_form, your_orders=your_orders)
 
 
+@app.route('/account/<int:user_id>/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password_for_logged(user_id):
+    if current_user.id != user_id:
+        abort(401)
+
+    form = UpdatePasswordFormForLogged()
+
+    if form.validate_on_submit():
+        if bcrypt.check_password_hash(current_user.password, form.current_password.data):
+            current_user.password = bcrypt.generate_password_hash(form.new_password.data)
+            db.session.commit()
+            flash('Your password has been changed', category='success')
+            return redirect(url_for('account', user_id=user_id, active_tab='favourites'))
+        else:
+            flash("Password is wrong. If you don\'t remember your password click \"forgot password?\"", category='info')
+            return redirect(url_for('change_password_for_logged', user_id=user_id))
+
+    return render_template('change_password_for_logged.html', form=form)
+
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        logout_user()
+
+    form = UpdateEmailForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            token = user.get_token()
+            body = f'''Your link for changing password is:
+{url_for('change_password', token=token, _external=True)}
+ignore if you didn't send this request'''
+            mess = Message('Reset Password request', body=body, recipients=[user.email], sender='noreply@webshop.com')
+            mail.send(mess)
+            return redirect(url_for('login'))
+        else:
+            flash('There is no user with this email. Please log in first', category='success')
+
+    return render_template('forgot_password.html', form=form)
+
+
+@app.route('/change_password/<token>', methods=['GET', 'POST'])
+def change_password(token):
+    if current_user.is_authenticated:
+        logout_user()
+
+    user = User.validate_token(token)
+    if not user:
+        flash('Token expired.', category='danger')
+        return redirect(url_for('login'))
+
+    form = UpdatePasswordForm()
+    if form.validate_on_submit():
+        user.password = bcrypt.generate_password_hash(form.password.data)
+        db.session.commit()
+        flash('Your password has been changed. Now log in.', category='success')
+        return redirect(url_for('login'))
+
+    return render_template('change_password.html', form=form)
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -277,7 +342,7 @@ def finalize_transaction_user():
     total_price = cart.get_total_price()
     form = AddressForm()
 
-    if current_user.has_address:
+    if current_user.has_address:  # populate form with data
 
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name

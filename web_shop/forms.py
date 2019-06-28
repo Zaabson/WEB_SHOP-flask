@@ -49,6 +49,23 @@ class UpdateEmailForm(FlaskForm):
     submit = SubmitField(label='Update Email')
 
 
+class UpdatePasswordFormForLogged(FlaskForm):
+
+    current_password = PasswordField(label='Your Current Password', validators=[DataRequired()])
+    new_password = PasswordField(label='New Password', validators=[DataRequired(), Length(min=8)])
+    confirm_new_password = PasswordField(label='Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
+
+    submit = SubmitField('Change Password')
+
+
+class UpdatePasswordForm(FlaskForm):
+
+    password = PasswordField(label='New Password', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField(label='Confirm New Password', validators=[DataRequired(), EqualTo('password')])
+
+    submit = SubmitField('Update Password')
+
+
 class LoginAdminForm(FlaskForm):
 
     username = PasswordField(label='username', validators=[DataRequired()])

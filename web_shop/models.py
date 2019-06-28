@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from flask_login import UserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer
 
-from web_shop import db, login_manager
+from web_shop import db, login_manager, app
 
 
 @login_manager.user_loader
@@ -40,6 +41,22 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"User(id={self.id}, email={self.email}, has_address={self.has_address})"
+
+    def get_token(self):
+        serializer = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        token = serializer.dumps({'user_id': self.id})
+        return token
+
+    @staticmethod
+    def validate_token(token):
+        serializer = TimedJSONWebSignatureSerializer(app.config['SECRET_KEY'])
+        try:
+            data = serializer.loads(token)
+            user_id = data['user_id']
+        except:
+            return None
+        user = User.query.get(int(user_id))
+        return user
 
 
 class Product(db.Model):

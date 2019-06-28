@@ -32,6 +32,7 @@
                 {% else %}
                     {{ form.password(class="form-control form-control-lg") }}
                 {% endif %}
+                <a class='text-sm' href="{{ url_for('forgot_password') }}">forgot password?</a>
             </div>
             <div class="form-check">
                 {{ form.remember(class="form-check-input") }}
