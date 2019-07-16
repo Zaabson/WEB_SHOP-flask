@@ -14,6 +14,7 @@ and environment variables named MAIL_USERNAME, MAIL_PASSWORD, SECRET_KEY, ADMIN_
 - buying (without paying)
 - password reset link
 - favourites stored on server
+- postal code validation based on customer's country
 
 ## yet to implement
 
