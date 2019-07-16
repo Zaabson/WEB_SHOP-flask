@@ -20,6 +20,5 @@ and environment variables named MAIL_USERNAME, MAIL_PASSWORD, SECRET_KEY, ADMIN_
 - paying
 - about page
 - home page
-- change the look of some pages
-- transaction table on admin page (add interactiveness)
-- a lot
+- admin page (add interactiveness)
+- visual fixes
